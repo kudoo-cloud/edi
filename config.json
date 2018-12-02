@@ -1,0 +1,19 @@
+{
+    "poll": true,
+    "emailDownloadSettings": {
+        "markSeen": true,
+        "unseen": true,
+        "since": null
+    },
+    "incomingEmailAddress": {
+        "user": "Edi.pad@britax.com",
+        "password": "Analytics1211",
+        "host": "imap.outlook.com",
+        "port": 993,
+        "tls": true,
+        "authTimeout": 1000000000
+    },
+    "customersEmails": [
+       "emx@messagexchange.com","KmartB2BMail0@kmart.com.au","BIGWPAD.Donotreply@leadtec.com.au"
+    ]
+}

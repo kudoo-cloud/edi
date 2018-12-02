@@ -1,0 +1,19 @@
+{
+    "poll": false,
+    "emailDownloadSettings": {
+        "markSeen": true,
+        "unseen": false,
+        "since": "2018-09-01"
+    },
+    "incomingEmailAddress": {
+        "user": "Edi.pad@britax.com",
+        "password": "Analytics1211",
+        "host": "imap.outlook.com",
+        "port": 993,
+        "tls": true,
+        "authTimeout": 80000
+    },
+    "customersEmails": [
+        "BIGWPAD.Donotreply@leadtec.com.au"
+    ]
+}
