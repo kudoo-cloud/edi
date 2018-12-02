@@ -1,4 +1,13 @@
 # Overview 
+Currently this codebase allows parsing of EDI documents
+
+## Supported Documents
+* X12 852
+
+## Roadmap
+* X12 850
+* X12 856
+
 This piece of code polls an email address for emails.
 
 * downloads all the attachments to a file directory `./history/new`
