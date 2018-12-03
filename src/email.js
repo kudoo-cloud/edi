@@ -1,6 +1,5 @@
 const imaps = require("imap-simple");
-const moment = require("moment");
-const userConfig = require("../config.json");
+const moment = require("moment-timezone");
 const winston = require("winston");
 
 const logger = winston.createLogger({
@@ -10,23 +9,11 @@ const logger = winston.createLogger({
     ]
 });
 
-let config = {};
-config.imap = userConfig.incomingEmailAddress;
-
-/**
- * @param {string} address an Email address
- * @param {json} emailDownloadSettings the settings to use when fetching emails. Should look like the following: ```{
-        "markSeen": false,
-        "unseen": true,
-        "since": null
-    }```
- */
-exports.downloadEmails = async function downloadEmails(address, emailDownloadSettings) {
-
-    //  
+exports.downloadEmails = async function downloadEmails(address, config) {
+    
     const fetchOptions = {
         bodies: ["HEADER.FIELDS (FROM TO SUBJECT DATE)"],
-        markSeen: emailDownloadSettings.markSeen,
+        markSeen: config.emailDownloadSettings.markSeen,
         struct: true
     };
 
@@ -34,19 +21,19 @@ exports.downloadEmails = async function downloadEmails(address, emailDownloadSet
         ["from", address]
     ];
 
-    if (emailDownloadSettings.since === null) {
-        emailDownloadSettings.since = moment.utc().format("YYYY-MM-DD");
+    if (config.emailDownloadSettings.since === null) {
+        config.emailDownloadSettings.since = moment.utc().format("YYYY-MM-DD");
     }
 
-    if (emailDownloadSettings.unseen === true) {
-        searchCriteria.push([ "UNSEEN", ["SINCE", emailDownloadSettings.since] ]);
+    if (config.emailDownloadSettings.unseen === true) {
+        searchCriteria.push([ "UNSEEN", ["SINCE", config.emailDownloadSettings.since] ]);
     } else
-        searchCriteria.push( ["SINCE", emailDownloadSettings.since]);
+        searchCriteria.push( ["SINCE", config.emailDownloadSettings.since]);
 
-    const connection = await imaps.connect(config);
+    const connection = await imaps.connect(config.incomingEmailAddress);
     logger.log({
         level: "info",
-        message: "Connection to email address " + config.imap.user + " successful",
+        message: "Connection to email address " + config.incomingEmailAddress.imap.user + " successful",
         datetime: moment().tz("Australia/Melbourne").format()
     });
     const box = await connection.openBox("INBOX");
@@ -58,26 +45,26 @@ exports.downloadEmails = async function downloadEmails(address, emailDownloadSet
     const emails = await connection.search(searchCriteria, fetchOptions);
     logger.log({
         level: "info",
-        message: emails.length + " emails downloaded sent to " + config.imap.user + " and from " + address,
+        message: emails.length + " emails downloaded sent to " + config.incomingEmailAddress.imap.user + " and from " + address,
         datetime: moment().tz("Australia/Melbourne").format()
     });
     connection.end();
     logger.log({
         level: "info",
-        message: "Connection to email address " + config.imap.user + "closed",
+        message: "Connection to email address " + config.incomingEmailAddress.imap.user + "closed",
         datetime: moment().tz("Australia/Melbourne").format()
     });
     return emails;
 };
 
-exports.downloadAttachment = async function downloadAttachment(email) {
+exports.downloadAttachment = async function downloadAttachment(email,config) {
 
     let attachments = [];
     try {
-        const connection = await imaps.connect(config);
+        const connection = await imaps.connect(config.incomingEmailAddress);
         logger.log({
             level: "info",
-            message: "Connection to email address " + config.imap.user + " successful",
+            message: "Connection to email address " + config.incomingEmailAddress.imap.user + " successful",
             datetime: moment().tz("Australia/Melbourne").format()
         });
         const box = await connection.openBox("INBOX");
@@ -103,7 +90,7 @@ exports.downloadAttachment = async function downloadAttachment(email) {
         connection.end();
         logger.log({
             level: "info",
-            message: "Connection to email address " + config.imap.user + "closed",
+            message: "Connection to email address " + config.incomingEmailAddress.user + "closed",
             datetime: moment().tz("Australia/Melbourne").format()
         });
       

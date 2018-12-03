@@ -1,5 +1,4 @@
 {
-    "poll": true,
     "emailDownloadSettings": {
         "markSeen": true,
         "unseen": true,
