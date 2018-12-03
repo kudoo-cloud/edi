@@ -48,10 +48,10 @@ exports.resetDB = async function resetDB() {
     });
 };
 
-exports.loadCSVintoDB = function loadCSVintoEDITable(csv,fileName){
-    const data = papa.parse(csv);
+exports.loadCSVintoDB = async function loadCSVintoEDITable(csv,fileName){
+    const data = await papa.parse(csv);
     // Need to skip the first line of the csv for headers
-    data.data.forEach(trans => {
+    data.data.forEach(async trans => {
         if (trans[0] === "activityCode") {
             logger.log({
                 level: "info",
@@ -67,10 +67,10 @@ exports.loadCSVintoDB = function loadCSVintoEDITable(csv,fileName){
             '${trans[6]}','${trans[7]}',
             '${trans[8]}','${trans[9]}',
             '${fileName}')`;
-            sql.query(connNewDB, insert, (err, rows) => {
+            await sql.query(connNewDB, insert, (err, rows) => {
                 if(err) {
                     logger.log({
-                        level: "error",
+                        level: "The SQL is broken",
                         message: err,
                     });
                     return;

@@ -28,33 +28,41 @@ async function main(customer, config) {
 
     await cleanNewDirectory();
     const emails = await email.downloadEmails(customer, config);
-    for (let mail of emails) {
+    for (let mail of emails) { 
         const attachment = await email.downloadAttachment(mail, config);
         // We need to deal here with ZIP files. 
-        const ts = moment().tz("Australia/Melbourne").format().replace(/:/g, "");
-        const len = attachment.filename.length;
-        const newFileName = attachment.filename.substr(0, len -4) + " " + ts + attachment.filename.substr(len -4, len);
-        if (attachment.filename.substr(attachment.filename.length-3,attachment.filename.length) === "zip") {
-            // Then we'll extract the ZIP file to the ZIP directory.
-            fs.writeFileSync(zipDir + newFileName, attachment.data);
+        if (attachment === undefined) {
             logger.log({
                 level: "info",
-                message: "File: " + newFileName + " successfully written to " + zipDir,
+                message: "Aint no attachment innit!",
                 datetime: moment().tz("Australia/Melbourne").format()
-            });
-            await fs.createReadStream(zipDir + newFileName).pipe(unzipper.Extract({ path: newDir }));
+            }); 
+        } else { 
+            const ts = moment().tz("Australia/Melbourne").format().replace(/:/g, "");
+            const len = attachment.filename.length;
+            const newFileName = attachment.filename.substr(0, len -4) + " " + ts + attachment.filename.substr(len -4, len);
+            if (attachment.filename.substr(attachment.filename.length-3,attachment.filename.length) === "zip") {
+                // Then we'll extract the ZIP file to the ZIP directory.
+                fs.writeFileSync(zipDir + newFileName, attachment.data);
+                logger.log({
+                    level: "info",
+                    message: "File: " + newFileName + " successfully written to " + zipDir,
+                    datetime: moment().tz("Australia/Melbourne").format()
+                });
+                await fs.createReadStream(zipDir + newFileName).pipe(unzipper.Extract({ path: newDir }));
 
-            //fs.writeFileSync(path + attachment.filename, attachment.data);
-        } else {
-            fs.writeFileSync(newDir + newFileName, attachment.data);
-            logger.log({
-                level: "info",
-                message: "File: " + newFileName + " successfully written to " + newDir,
-                datetime: moment().tz("Australia/Melbourne").format()
-            });
+                //fs.writeFileSync(path + attachment.filename, attachment.data);
+            } else {
+                fs.writeFileSync(newDir + newFileName, attachment.data);
+                logger.log({
+                    level: "info",
+                    message: "File: " + newFileName + " successfully written to " + newDir,
+                    datetime: moment().tz("Australia/Melbourne").format()
+                });
+            }
+            await cleanNewDirectory();
         }
     }
-    await cleanNewDirectory();
 }
 
 async function cleanNewDirectory() {
@@ -71,7 +79,8 @@ async function cleanNewDirectory() {
                     datetime: moment().tz("Australia/Melbourne").format()
                 });
                 const len = files[file].length;
-                const newFile = files[file].substr(0, len-3) + "csv";
+                const tss = moment().tz("Australia/Melbourne").format().replace(/:/g, "");
+                const newFile = files[file].substr(0, len-4) + tss + ".csv";
                 // Need to remove file extension and replace with .csv
                 fs.writeFileSync(csvDir + newFile,ediObj.csv);
                 logger.log({
@@ -82,10 +91,13 @@ async function cleanNewDirectory() {
                 // Upload the CSV into the database
                 await sql.loadCSVintoDB(ediObj.csv,newFile);
                 // We need to move the file to success folder
-                fs.renameSync(newDir + files[file], successDir + files[file]);
+                const ts = moment().tz("Australia/Melbourne").format().replace(/:/g, "");
+                const fname = files[file].substr(0, files[file].length - 4);
+                const fext = files[file].substr(files[file].length - 4, files[file].length);
+                fs.renameSync(newDir + files[file], successDir + fname + ts + fext);
                 logger.log({
                     level: "info",
-                    message: "File: " + files[file] + "moved to Success directory.",
+                    message: "File: " + files[file] +  + "moved to Success directory.",
                     datetime: moment().tz("Australia/Melbourne").format()
                 });
             } catch (error) {

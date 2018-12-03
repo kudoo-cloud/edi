@@ -7,11 +7,11 @@
     "incomingEmailAddress": {
         "imap": {
             "user": "renee.thomas@britax.com",
-            "password": "",
+            "password": "Jason6230199*",
             "host": "imap.outlook.com",
             "port": 993,
             "tls": true,
-            "authTimeout": 80000
+            "authTimeout": 800000
         }
     },
     "customersEmails": [
